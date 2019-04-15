@@ -9,6 +9,9 @@ class TiebaSpider:
         self.start_url = "http://tieba.baidu.com/mo/q----,sz@320_240-1-3---2/m?kw=" + tieba_name + "&pn=0"
         self.part_url = "http://tieba.baidu.com/mo/q----,sz@320_240-1-3---2/m?"
         self.headers = {
+            "Accept": "text / html, application / xhtml + xml, application / xml;q = 0.9, image / webp, image / apng, * / *;q = 0.8, application / signed - exchange;v = b3",
+            "Accept - Encoding": "gzip, deflate",
+            "Accept - Language": "zh - CN, zh;q = 0.9",
             "User-Agent": "Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Mobile Safari/537.36"}
 
     def parse_url(self, url):
@@ -36,15 +39,16 @@ class TiebaSpider:
         # 3.2 请求列表页的url地址，获取详情页的第一页
         # print(detail_url)
         detail_html_str = self.parse_url(detail_url)
+        print(detail_html_str)
         detail_html = etree.HTML(detail_html_str)
         # 3.3 提取详情页的第一页图片，提取下一页的地址
-        img_list = detail_html.xpath("//img[@class=BDE_Image]/@src")  # 由于请求网址图片发生变化，导致图片获取不到，但本节思路是正确的，可以用来参考
-        print(img_list)
+        img_list = detail_html.xpath("//img[@class='BDE_Image']/@src")  # 由于请求网址图片发生变化，导致图片获取不到，但本节思路是正确的，可以用来参考
         total_img_list.extend(img_list)  # extend的作用类似于+=
         # 3.4 请求详情页下一页的地址，进入循环3.2-3.4
         detail_next_url = detail_html.xpath("//a[text()='下一页']/@href")
         if len(detail_next_url) > 0:
             detail_next_url = self.part_url + detail_next_url[0]
+            # 递归
             return self.get_img_list(detail_next_url, total_img_list)  # 必须要有return
 
         return total_img_list
@@ -75,5 +79,5 @@ class TiebaSpider:
 
 
 if __name__ == '__main__':
-    tieba_spider = TiebaSpider("猫")
+    tieba_spider = TiebaSpider("校花")
     tieba_spider.run()
